@@ -78,7 +78,7 @@ public class Async {
                     //Created
                     jsonObject.put("Created", dataProcess.saveTime());
                     //Image
-                    jsonObject.put("Image", dataProcess.bitmapToString(image));
+                    jsonObject.put("Image", "data:image/jpeg;base64,"+dataProcess.bitmapToString(image));
 
                     //Info
                     //키 값을 반복자로 받아온다.

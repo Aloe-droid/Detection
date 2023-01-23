@@ -3,6 +3,7 @@ package com.example.detection;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 bluetoothAddress = bluetoothConnect.getAddress();
                 try {
                     id.setAddress(bluetoothAddress.trim());
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     id.setAddress(null);
                 }
             }
@@ -110,12 +111,17 @@ public class MainActivity extends AppCompatActivity {
         //qr 코드가 스캔되면
         if (result != null) {
             if (result.getContents() != null) {
-                // UserId 와 CameraID를 받는다. ex) "sons/4"
-                String id = result.getContents();
-                int slash = id.indexOf("/");
-                userID = id.substring(0, slash);
-                cameraID = id.substring(slash + 1);
+                // UserId 와 CameraID를 받는다. ex) https://****************:8093//user/(userId)/camera/(CameraId)/register
+                String url = result.getContents();
+                String urlUserId = "/user/";
+                String urlCameraId = "/camera/";
+                int userIdSlash = url.indexOf(urlUserId);
+                int cameraIdSlash = url.indexOf(urlCameraId);
+                int register = url.indexOf("/register");
+                userID = url.substring(userIdSlash + urlUserId.length(), cameraIdSlash);
+                cameraID = url.substring(cameraIdSlash + urlCameraId.length(), register);
                 editText.setText(this.cameraID);
+                Log.d("What ID", userID + " : " + cameraID);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
