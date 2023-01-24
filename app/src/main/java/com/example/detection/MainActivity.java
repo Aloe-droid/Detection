@@ -1,15 +1,11 @@
 package com.example.detection;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -121,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
                 userID = url.substring(userIdSlash + urlUserId.length(), cameraIdSlash);
                 cameraID = url.substring(cameraIdSlash + urlCameraId.length(), register);
                 editText.setText(this.cameraID);
-                Log.d("What ID", userID + " : " + cameraID);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -131,19 +126,6 @@ public class MainActivity extends AppCompatActivity {
     public void permissionCheck() {
         PermissionSupport permissionSupport = new PermissionSupport(this, this);
         permissionSupport.checkPermissions();
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PermissionSupport.MULTIPLE_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Ok", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "No", Toast.LENGTH_SHORT).show();
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
 }

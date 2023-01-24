@@ -21,7 +21,6 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -54,10 +53,10 @@ public class MqttClass implements MqttCallback {
 
         Random random = new Random();
         String[] randoms = new String[10];
-        for(int i = 0 ; i< 10 ; i++){
-           randoms[i] = random.nextInt(10) + "";
+        for (int i = 0; i < 10; i++) {
+            randoms[i] = random.nextInt(10) + "";
         }
-        CLIENT_ID = "android" + String.join("",randoms);
+        CLIENT_ID = "android" + String.join("", randoms);
     }
 
     public void connectMqtt() {
@@ -120,7 +119,7 @@ public class MqttClass implements MqttCallback {
                 }
 
                 @Override
-                public void messageArrived(String topic, MqttMessage message) throws IOException, JSONException {
+                public void messageArrived(String topic, MqttMessage message) throws JSONException {
                     if (topic.equals(MqttClass.TOPIC_CONTROL)) {
                         //문자를 받으면 사이즈를 변환하거나 기존의 전송 속도를 변경할 수 있다.
                         String s = message.toString();
@@ -143,7 +142,7 @@ public class MqttClass implements MqttCallback {
                         //TOPIC 이 모터제어라면
                     } else if (topic.equals(MqttClass.TOPIC_MOTOR)) {
                         //블루투스 쓰레드가 살아있다면
-                        if (bluetoothConnect != null && bluetoothConnect.checkThread()) {
+                        if (bluetoothConnect != null && bluetoothConnect.checkGATT()) {
                             //json 객체로 읽기
                             JSONObject jsonObject = new JSONObject(new String(message.getPayload()));
                             if ((jsonObject.get("CameraId") + "").equals(RoomDB.getInstance(context).userDAO().getAll().get(0).getCameraId())) {
@@ -168,14 +167,18 @@ public class MqttClass implements MqttCallback {
                         }
                         // webRTC 종료 요청
                     } else if (topic.equals(MqttClass.TOPIC_WEBRTC_FIN)) {
-                        //문자열을 읽어서 내 아이디가 맞다면 webRTC 를 종료한다.
-                        JSONObject jsonObject = new JSONObject(new String(message.getPayload()));
-                        String userId = (String) jsonObject.get("UserId");
-                        int cameraId = (int) jsonObject.get("CameraId");
-                        ID id = RoomDB.getInstance(context).userDAO().getAll().get(0);
-                        if (userId.equals(id.getUserId()) && cameraId == Integer.parseInt(id.getCameraId())) {
-                            WebVIewActivity webVIewActivity = (WebVIewActivity) WebVIewActivity.webViewActivity;
-                            webVIewActivity.finish();
+                        try {
+                            //문자열을 읽어서 내 아이디가 맞다면 webRTC 를 종료한다.
+                            JSONObject jsonObject = new JSONObject(new String(message.getPayload()));
+                            String userId = (String) jsonObject.get("UserId");
+                            int cameraId = (int) jsonObject.get("CameraId");
+                            ID id = RoomDB.getInstance(context).userDAO().getAll().get(0);
+                            if (userId.equals(id.getUserId()) && cameraId == Integer.parseInt(id.getCameraId())) {
+                                WebVIewActivity webVIewActivity = (WebVIewActivity) WebVIewActivity.webViewActivity;
+                                webVIewActivity.finish();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
                 }

@@ -30,6 +30,7 @@ public class PermissionSupport {
         permission.add(Manifest.permission.RECORD_AUDIO);
         permission.add(Manifest.permission.MODIFY_AUDIO_SETTINGS);
         permission.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        permission.add(Manifest.permission.ACCESS_FINE_LOCATION);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             permission.add(Manifest.permission.BLUETOOTH);
