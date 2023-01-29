@@ -160,7 +160,7 @@ public class MqttClass implements MqttCallback {
                         //만약 카메라 ID가 동일하다면 웹사이트 접속
                         if ((cameraId + "").equals(RoomDB.getInstance(context).userDAO().getAll().get(0).getCameraId())) {
                             //해당 웹사이트 주소 이후
-                            String url = "http://" + SERVER_ADDRESS + ":8092/user/ " + userId + "/camera/" + cameraId + "/register";
+                            String url = "https://" + SERVER_ADDRESS + ":8093/user/ " + userId + "/camera/" + cameraId + "/register";
                             Intent intent = new Intent(activity, WebVIewActivity.class);
                             intent.putExtra("url", url);
                             activity.startActivity(intent);
