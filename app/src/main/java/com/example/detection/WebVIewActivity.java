@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
@@ -29,6 +31,9 @@ public class WebVIewActivity extends AppCompatActivity {
         webView = findViewById(R.id.webView);
 
         webViewActivity = WebVIewActivity.this;
+
+        //자동꺼짐 해제
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         Intent intent = getIntent();
         String url = intent.getStringExtra("url");
@@ -60,7 +65,7 @@ public class WebVIewActivity extends AppCompatActivity {
         });
 
         webView.loadUrl(url);
-
+        new Handler().postDelayed(() -> webView.reload(),3000);
     }
 
     // 안드로이드 내에서 특정 키를 누를 때 동작하는 메소드

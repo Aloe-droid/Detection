@@ -7,6 +7,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,6 +62,9 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
         previewView = findViewById(R.id.previewView);
         rectView = findViewById(R.id.rectView);
+
+        //자동꺼짐 해제
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //비동기 처리 클래스 (mqtt 전송을 위해)
         async = new Async(this, this);

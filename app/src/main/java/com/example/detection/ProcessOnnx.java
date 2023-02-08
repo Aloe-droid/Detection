@@ -34,7 +34,9 @@ public class ProcessOnnx {
     public float imageMean = 0.0f;
     public float imageSTD = 255.0f;
     static String fileName = "fire_640.onnx";
+    static String fileNameV8 = "fire_640_v8.onnx";
     String labelName = "label_fire.txt";
+    String labelNameV8 = "label_fire_v8.txt";
     String[] classes;
     public float objectThresh = 0.8f; //확률값 80%가 넘겨야 화면에 보이게 설정
 
