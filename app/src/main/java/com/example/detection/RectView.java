@@ -71,12 +71,20 @@ public class RectView extends View {
 
     // Result 가 담긴 리스트들을 받아와서 각각의 해시맵 (fireMap, smokeMap)에 담는다.
     public void resultToList(ArrayList<Result> results) {
+        //rectF에는 상자의 좌표값 , String 에는 객체명(화재 or 연기) 과 확률을 적는다.
         for (Result result : results) {
             if (result.classIndex == 0) {
-                //rectF에는 상자의 좌표값 , String 에는 객체명(화재 or 연기) 과 확률을 적는다.
-                smokeMap.put(result.rect, classes[0] + ", " + Math.round(result.score * 100) + "%");
+                if (classes[0].equals("fire")) { // yolo v8
+                    fireMap.put(result.rect, classes[0] + ", " + Math.round(result.score * 100) + "%");
+                } else {                         // yolo v5
+                    smokeMap.put(result.rect, classes[0] + ", " + Math.round(result.score * 100) + "%");
+                }
             } else {
-                fireMap.put(result.rect, classes[1] + ", " + Math.round(result.score * 100) + "%");
+                if (classes[0].equals("fire")) { // yolo v8
+                    smokeMap.put(result.rect, classes[1] + ", " + Math.round(result.score * 100) + "%");
+                } else {                         // yolo v5
+                    fireMap.put(result.rect, classes[1] + ", " + Math.round(result.score * 100) + "%");
+                }
             }
         }
     }

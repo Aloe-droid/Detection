@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import androidx.annotation.Nullable;
@@ -28,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         editText = findViewById(R.id.editText);
+        CheckBox motionCheck = findViewById(R.id.Motion);
+        CheckBox objectCheck = findViewById(R.id.Object);
         Button button = findViewById(R.id.button);
         Button buttonQR = findViewById(R.id.buttonqr);
         Button buttonBT = findViewById(R.id.buttonBT);
@@ -76,8 +79,13 @@ public class MainActivity extends AppCompatActivity {
             //다시 id를 저장한다.
             roomDB.userDAO().insert(id);
             //id를 저장한 상태로 카메라 액티비티를 실행한다.
-            Intent intent = new Intent(MainActivity.this, CameraActivity.class);
-            startActivity(intent);
+            if(objectCheck.isChecked()) {
+                Intent intent = new Intent(MainActivity.this, CameraActivity.class);
+                startActivity(intent);
+            }else if(motionCheck.isChecked()){
+                Intent intent = new Intent(MainActivity.this, CVmotionActivity.class);
+                startActivity(intent);
+            }
             finish();
         });
 

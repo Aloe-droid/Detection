@@ -9,7 +9,6 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.WindowManager;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.AspectRatio;
 import androidx.camera.core.CameraSelector;
@@ -120,7 +119,7 @@ public class CameraActivity extends AppCompatActivity {
 
         //카메라 렌즈 중 자기가 고를 렌즈 선택
         CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
         //16:9의 비율로 화면 보기
@@ -143,13 +142,10 @@ public class CameraActivity extends AppCompatActivity {
         //그림을 그릴 rectView 클래스에 label 정보 (화재, 연기) 배열을 전달한다.
         rectView.setClasses(processOnnx.classes);
 
-        imageAnalysis.setAnalyzer(Executors.newCachedThreadPool(), new ImageAnalysis.Analyzer() {
-            @Override
-            public void analyze(@NonNull ImageProxy imageProxy) {
-                //이미지 처리 메소드
-                imageProcessing(imageProxy);
-                imageProxy.close();
-            }
+        imageAnalysis.setAnalyzer(Executors.newCachedThreadPool(), imageProxy -> {
+            //이미지 처리 메소드
+            imageProcessing(imageProxy);
+            imageProxy.close();
         });
         //생명주기는 이 클래스에 귀속
         processCameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis);
@@ -188,10 +184,22 @@ public class CameraActivity extends AppCompatActivity {
                 float[][][] output = (float[][][]) result.get(0).getValue();
                 //세번째 배열을 부가설명하자면, 0~3은 좌표값 4는 확률 값 5~는 학습된 데이터의 갯수이다. 즉 따라서 고정되는 5를 빼면 데이터의 개수를 알 수 있다.
 
+                //yolo v8 모델의 출력 크기는 [1][6][8400]이다.
+                //v5와 달리 좌표값 4개 + alpha (label 속 데이터의 갯수)이다. 이제 정확도(confidence)가 사라지고
+                // 해당 label 의 배열안에서 최대 값을 구하면 된다.
+
                 //결과값 가져오기
-                // 연산하는 총량으로 (((640/32)^2 + (640/16)^2 + (640/8)^2)*3) 이다.
-                int rows = output[0].length;
-                ArrayList<Result> results = processOnnx.outputsToNMSPredictions(output, rows);
+                int rows;
+                ArrayList<Result> results;
+                if(processOnnx.labelName.equals("label_fire.txt")) {
+                    // v5 : 연산하는 총량으로 (((640/32)^2 + (640/16)^2 + (640/8)^2)*3) 이다.
+                    rows = output[0].length;
+                    results = processOnnx.outputsToNMSPredictions(output, rows);
+                }else{
+                    // v8 : 연산하는 총량으로 8400이다.
+                    rows = output[0][0].length;
+                    results = processOnnx.outputsToNMSPredictionsV8(output, rows);
+                }
 
                 //rectF 의 크기를 화면의 비율에 맞게 수정한다.
                 results = rectView.transFormRect(results);

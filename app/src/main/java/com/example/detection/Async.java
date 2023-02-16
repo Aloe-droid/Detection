@@ -78,7 +78,7 @@ public class Async {
                     //Created
                     jsonObject.put("Created", dataProcess.saveTime());
                     //Image
-                    jsonObject.put("Image", "data:image/jpeg;base64,"+dataProcess.bitmapToString(image));
+                    jsonObject.put("Image", "data:image/jpeg;base64," + dataProcess.bitmapToString(image));
 
                     //Info
                     //키 값을 반복자로 받아온다.
@@ -91,7 +91,7 @@ public class Async {
                     // 썸네일 전송
                 } else {
                     jsonObject.put("CameraId", Integer.parseInt(RoomDB.getInstance(context).userDAO().getAll().get(0).getCameraId()));
-                    jsonObject.put("Thumbnail", dataProcess.bitmapToString(image));
+                    jsonObject.put("Thumbnail", "data:image/jpeg;base64," + dataProcess.bitmapToString(image));
                 }
 
                 return Observable.just(jsonObject);

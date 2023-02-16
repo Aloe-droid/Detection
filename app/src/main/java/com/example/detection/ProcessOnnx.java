@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -33,12 +32,12 @@ public class ProcessOnnx {
     static int PIXEL_SIZE = 3;
     public float imageMean = 0.0f;
     public float imageSTD = 255.0f;
-    static String fileName = "fire_640.onnx";
-    static String fileNameV8 = "fire_640_v8.onnx";
-    String labelName = "label_fire.txt";
-    String labelNameV8 = "label_fire_v8.txt";
+    //static String fileName = "fire_640.onnx";
+    static String fileName = "fire_640_v8.onnx";
+    //String labelName = "label_fire.txt";
+    String labelName = "label_fire_v8.txt";
     String[] classes;
-    public float objectThresh = 0.8f; //확률값 80%가 넘겨야 화면에 보이게 설정
+    public float objectThresh = 0.3f; //확률값 30%가 넘겨야 화면에 보이게 설정
 
     public ProcessOnnx(Context context) {
         this.context = context;
@@ -161,7 +160,7 @@ public class ProcessOnnx {
         return Bitmap.createScaledBitmap(bitmap, INPUT_SIZE, INPUT_SIZE, true);
     }
 
-
+    //yolo v5 의 output
     public ArrayList<Result> outputsToNMSPredictions(float[][][] output, int rows) {
         ArrayList<Result> results = new ArrayList<>();
 
@@ -203,6 +202,55 @@ public class ProcessOnnx {
         return nms(results);
     }
 
+    //yolo v8 의 output
+    public ArrayList<Result> outputsToNMSPredictionsV8(float[][][] output, int rows) {
+        ArrayList<Result> results = new ArrayList<>();
+
+       float[][][] outputV8 = new float[1][rows][output[0].length];
+
+        // Transpose array
+        for (int l = 0; l < output[0].length ; l++) {
+            for (int m = 0; m < rows; m++) {
+                outputV8[0][m][l] = output[0][l][m];
+            }
+        }
+
+        // 각 bounding box 에 대해 가장 확률이 높은 Class 예측
+        for (int i = 0; i < rows; ++i) {
+            int detectionClass = -1;
+            float maxClass = 0;
+
+            float[] _classes = new float[classes.length];
+            //3차원 output 배열에서 4번부터있는 label 만 따로 빼서 새로운 1차원 클래스를 만든다.
+            System.arraycopy(outputV8[0][i], 4, _classes, 0, classes.length);
+
+            //그 label 중에서 가장 값이 큰 값을 선정한다.
+            for (int c = 0; c < classes.length; ++c) {
+                if (_classes[c] > maxClass) {
+                    detectionClass = c;
+                    maxClass = _classes[c];
+                }
+            }
+
+            //실제 확률 값은 4번의 확률값과 해당 label 의 확률값의 곱이다.
+            float confidenceInClass = maxClass;
+            //만약 그 확률 값이 특정 확률을 넘어서면 List 형태로 저장한다.
+            if (confidenceInClass > objectThresh) {
+                float xPos = outputV8[0][i][0];
+                float yPos = outputV8[0][i][1];
+                float width = outputV8[0][i][2];
+                float height = outputV8[0][i][3];
+
+                //사각형은 화면 밖으로 나갈 수 없으니 화면을 넘기면 최대 화면 값을 가지게 한다.
+                RectF rectF = new RectF(Math.max(0, xPos - width / 2), Math.max(0, yPos - height / 2),
+                        Math.min(INPUT_SIZE - 1, xPos + width / 2), Math.min(INPUT_SIZE - 1, yPos + height / 2));
+                Result recognition = new Result(detectionClass, confidenceInClass, rectF);
+                results.add(recognition);
+            }
+        }
+        return nms(results);
+    }
+
     //nms 처리 메소드
     public ArrayList<Result> nms(ArrayList<Result> results) {
         ArrayList<Result> nmsList = new ArrayList<>();
@@ -211,12 +259,7 @@ public class ProcessOnnx {
             //1.find max confidence per class
             PriorityQueue<Result> pq =
                     new PriorityQueue<>(50,
-                            new Comparator<Result>() {
-                                @Override
-                                public int compare(Result o1, Result o2) {
-                                    return Float.compare(o1.score, o2.score);
-                                }
-                            });
+                            (o1, o2) -> Float.compare(o1.score, o2.score));
 
             for (int i = 0; i < results.size(); i++) {
                 if (results.get(i).classIndex == k) {

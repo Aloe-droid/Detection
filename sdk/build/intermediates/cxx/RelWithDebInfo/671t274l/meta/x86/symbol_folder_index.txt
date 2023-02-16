@@ -1,0 +1,1 @@
+C:\Users\user\AndroidStudioProjects\Detection\sdk\build\intermediates\cxx\RelWithDebInfo\671t274l\obj\x86
