@@ -45,11 +45,6 @@ public class MqttClass implements MqttCallback {
     public MqttClass(Activity activity, Context context) {
         this.context = context;
         this.activity = activity;
-    }
-
-    //블루투스 객체 가져오기
-    public void setBluetoothConnect(BluetoothConnect bluetoothConnect) {
-        this.bluetoothConnect = bluetoothConnect;
 
         Random random = new Random();
         String[] randoms = new String[10];
@@ -57,6 +52,11 @@ public class MqttClass implements MqttCallback {
             randoms[i] = random.nextInt(10) + "";
         }
         CLIENT_ID = "android" + String.join("", randoms);
+    }
+
+    //블루투스 객체 가져오기
+    public void setBluetoothConnect(BluetoothConnect bluetoothConnect) {
+        this.bluetoothConnect = bluetoothConnect;
     }
 
     public void connectMqtt() {

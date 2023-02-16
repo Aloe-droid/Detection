@@ -119,7 +119,7 @@ public class CameraActivity extends AppCompatActivity {
 
         //카메라 렌즈 중 자기가 고를 렌즈 선택
         CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
                 .build();
 
         //16:9의 비율로 화면 보기

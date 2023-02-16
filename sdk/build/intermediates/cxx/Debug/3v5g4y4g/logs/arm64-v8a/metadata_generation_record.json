@@ -15,7 +15,7 @@
   },
   {
     "level_": 0,
-    "message_": "rebuilding JSON C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\.cxx\\Debug\\3v5g4y4g\\arm64-v8a\\android_gradle_build.json due to:",
+    "message_": "JSON \u0027C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\.cxx\\Debug\\3v5g4y4g\\arm64-v8a\\android_gradle_build.json\u0027 was up-to-date",
     "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
     "tag_": "debug|arm64-v8a",
     "diagnosticCode_": 0,
@@ -25,147 +25,7 @@
       "fieldsDescending": {}
     },
     "memoizedSize": -1,
-    "memoizedHashCode": 834077155
-  },
-  {
-    "level_": 0,
-    "message_": "- expected json C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\.cxx\\Debug\\3v5g4y4g\\arm64-v8a\\android_gradle_build.json file is not present, will remove stale json folder",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": -613012363
-  },
-  {
-    "level_": 0,
-    "message_": "- missing previous command file C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\.cxx\\Debug\\3v5g4y4g\\arm64-v8a\\metadata_generation_command.txt, will remove stale json folder",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": 770372755
-  },
-  {
-    "level_": 0,
-    "message_": "- command changed from previous, will remove stale json folder",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": -1388606876
-  },
-  {
-    "level_": 0,
-    "message_": "removing stale contents from \u0027C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\.cxx\\Debug\\3v5g4y4g\\arm64-v8a\u0027",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": -1392832771
-  },
-  {
-    "level_": 0,
-    "message_": "created folder \u0027C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\.cxx\\Debug\\3v5g4y4g\\arm64-v8a\u0027",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": 1647947273
-  },
-  {
-    "level_": 0,
-    "message_": "executing cmake @echo off\n\"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\cmake\\\\3.18.1\\\\bin\\\\cmake.exe\" ^\n  \"-HC:\\\\Users\\\\user\\\\AndroidStudioProjects\\\\Detection\\\\sdk\\\\libcxx_helper\" ^\n  \"-DCMAKE_SYSTEM_NAME\u003dAndroid\" ^\n  \"-DCMAKE_EXPORT_COMPILE_COMMANDS\u003dON\" ^\n  \"-DCMAKE_SYSTEM_VERSION\u003d21\" ^\n  \"-DANDROID_PLATFORM\u003dandroid-21\" ^\n  \"-DANDROID_ABI\u003darm64-v8a\" ^\n  \"-DCMAKE_ANDROID_ARCH_ABI\u003darm64-v8a\" ^\n  \"-DANDROID_NDK\u003dC:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\23.1.7779620\" ^\n  \"-DCMAKE_ANDROID_NDK\u003dC:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\23.1.7779620\" ^\n  \"-DCMAKE_TOOLCHAIN_FILE\u003dC:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\23.1.7779620\\\\build\\\\cmake\\\\android.toolchain.cmake\" ^\n  \"-DCMAKE_MAKE_PROGRAM\u003dC:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\cmake\\\\3.18.1\\\\bin\\\\ninja.exe\" ^\n  \"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY\u003dC:\\\\Users\\\\user\\\\AndroidStudioProjects\\\\Detection\\\\sdk\\\\build\\\\intermediates\\\\cxx\\\\Debug\\\\3v5g4y4g\\\\obj\\\\arm64-v8a\" ^\n  \"-DCMAKE_RUNTIME_OUTPUT_DIRECTORY\u003dC:\\\\Users\\\\user\\\\AndroidStudioProjects\\\\Detection\\\\sdk\\\\build\\\\intermediates\\\\cxx\\\\Debug\\\\3v5g4y4g\\\\obj\\\\arm64-v8a\" ^\n  \"-DCMAKE_BUILD_TYPE\u003dDebug\" ^\n  \"-BC:\\\\Users\\\\user\\\\AndroidStudioProjects\\\\Detection\\\\sdk\\\\.cxx\\\\Debug\\\\3v5g4y4g\\\\arm64-v8a\" ^\n  -GNinja ^\n  \"-DANDROID_STL\u003dc++_shared\"\n",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": -468583494
-  },
-  {
-    "level_": 0,
-    "message_": "@echo off\n\"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\cmake\\\\3.18.1\\\\bin\\\\cmake.exe\" ^\n  \"-HC:\\\\Users\\\\user\\\\AndroidStudioProjects\\\\Detection\\\\sdk\\\\libcxx_helper\" ^\n  \"-DCMAKE_SYSTEM_NAME\u003dAndroid\" ^\n  \"-DCMAKE_EXPORT_COMPILE_COMMANDS\u003dON\" ^\n  \"-DCMAKE_SYSTEM_VERSION\u003d21\" ^\n  \"-DANDROID_PLATFORM\u003dandroid-21\" ^\n  \"-DANDROID_ABI\u003darm64-v8a\" ^\n  \"-DCMAKE_ANDROID_ARCH_ABI\u003darm64-v8a\" ^\n  \"-DANDROID_NDK\u003dC:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\23.1.7779620\" ^\n  \"-DCMAKE_ANDROID_NDK\u003dC:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\23.1.7779620\" ^\n  \"-DCMAKE_TOOLCHAIN_FILE\u003dC:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\23.1.7779620\\\\build\\\\cmake\\\\android.toolchain.cmake\" ^\n  \"-DCMAKE_MAKE_PROGRAM\u003dC:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\cmake\\\\3.18.1\\\\bin\\\\ninja.exe\" ^\n  \"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY\u003dC:\\\\Users\\\\user\\\\AndroidStudioProjects\\\\Detection\\\\sdk\\\\build\\\\intermediates\\\\cxx\\\\Debug\\\\3v5g4y4g\\\\obj\\\\arm64-v8a\" ^\n  \"-DCMAKE_RUNTIME_OUTPUT_DIRECTORY\u003dC:\\\\Users\\\\user\\\\AndroidStudioProjects\\\\Detection\\\\sdk\\\\build\\\\intermediates\\\\cxx\\\\Debug\\\\3v5g4y4g\\\\obj\\\\arm64-v8a\" ^\n  \"-DCMAKE_BUILD_TYPE\u003dDebug\" ^\n  \"-BC:\\\\Users\\\\user\\\\AndroidStudioProjects\\\\Detection\\\\sdk\\\\.cxx\\\\Debug\\\\3v5g4y4g\\\\arm64-v8a\" ^\n  -GNinja ^\n  \"-DANDROID_STL\u003dc++_shared\"\n",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": 397658779
-  },
-  {
-    "level_": 0,
-    "message_": "Exiting generation of C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\.cxx\\Debug\\3v5g4y4g\\arm64-v8a\\compile_commands.json.bin normally",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": -890593505
-  },
-  {
-    "level_": 0,
-    "message_": "done executing cmake",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": -1700953127
-  },
-  {
-    "level_": 0,
-    "message_": "write command file C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\.cxx\\Debug\\3v5g4y4g\\arm64-v8a\\metadata_generation_command.txt",
-    "file_": "C:\\Users\\user\\AndroidStudioProjects\\Detection\\sdk\\libcxx_helper\\CMakeLists.txt",
-    "tag_": "debug|arm64-v8a",
-    "diagnosticCode_": 0,
-    "memoizedIsInitialized": 1,
-    "unknownFields": {
-      "fields": {},
-      "fieldsDescending": {}
-    },
-    "memoizedSize": -1,
-    "memoizedHashCode": -340671785
+    "memoizedHashCode": 1682288474
   },
   {
     "level_": 0,

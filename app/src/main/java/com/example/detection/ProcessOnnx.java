@@ -37,7 +37,7 @@ public class ProcessOnnx {
     //String labelName = "label_fire.txt";
     String labelName = "label_fire_v8.txt";
     String[] classes;
-    public float objectThresh = 0.3f; //확률값 30%가 넘겨야 화면에 보이게 설정
+    public float objectThresh = 0.4f; //확률값 30%가 넘겨야 화면에 보이게 설정
 
     public ProcessOnnx(Context context) {
         this.context = context;

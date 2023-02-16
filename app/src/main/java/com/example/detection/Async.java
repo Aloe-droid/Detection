@@ -42,60 +42,57 @@ public class Async {
     }
 
     public Observable<JSONObject> sendRxJava(Bitmap image, @Nullable JSONObject rectJson, float intervalTime) {
-        return io.reactivex.rxjava3.core.Observable.defer(new Supplier<ObservableSource<JSONObject>>() {
-            @Override
-            public ObservableSource<JSONObject> get() throws Throwable {
-                JSONObject jsonObject = new JSONObject();
-                //시간 비교를 위해 구분 true 일때는 date1 에 저장, false 일 떄는 date2 에 저장된다.
-                //아래 '//전송에 성공한 경우, ture -> false 으로 바꾸거나, false -> true 로 바꾸어서 사진이 저장되는 시간을 다른 곳에 저장한다.'
-                // 라고 저장한 함수가 실행 되면 다음 사진이 저장될 때 저장하는 시간을 다른 곳에 넣는다.
-                // (current_date -> past_date) or (past_date -> current_date)
-                if (intervalTime != 0) {
-                    if (next) {
-                        //현재시간을 구하는 함수, 정확히는 핸드폰이 켜지고 난 이후 부터의 절대적인 시간, 시간 비교를 할 떄 주로 사용된다.
-                        date1 = SystemClock.elapsedRealtime();
-                    } else {
-                        date2 = SystemClock.elapsedRealtime();
-                    }
-
-                    //시간을 비교하여 특정 초 이상이 되면 not Ok 상태로 변한다.
-                    boolean ok = dataProcess.diffTime(date1, date2, intervalTime);
-                    if (!ok) {
-                        //특정 초 이하라면 빈 json 객체를 전송한다.
-                        return Observable.just(jsonObject);
-                    }
-                }
-                //특정 초를 넘겼다면 각종 정보들을 json 에 담는다.
-
-                //객체 검출 전송
-                if (rectJson != null) {
-
-                    ID id = RoomDB.getInstance(context).userDAO().getAll().get(0);
-                    //UserId
-                    jsonObject.put("UserId", id.getUserId());
-                    //CameraId
-                    jsonObject.put("CameraId", Integer.parseInt(id.getCameraId()));
-                    //Created
-                    jsonObject.put("Created", dataProcess.saveTime());
-                    //Image
-                    jsonObject.put("Image", "data:image/jpeg;base64," + dataProcess.bitmapToString(image));
-
-                    //Info
-                    //키 값을 반복자로 받아온다.
-                    Iterator<String> iterator = rectJson.keys();
-                    while (iterator.hasNext()) {
-                        //키 값과 밸류값을 기존의 json 객체에 추가한다.
-                        String name = iterator.next();
-                        jsonObject.put(name, rectJson.get(name));
-                    }
-                    // 썸네일 전송
+        return io.reactivex.rxjava3.core.Observable.defer((Supplier<ObservableSource<JSONObject>>) () -> {
+            JSONObject jsonObject = new JSONObject();
+            //시간 비교를 위해 구분 true 일때는 date1 에 저장, false 일 떄는 date2 에 저장된다.
+            //아래 '//전송에 성공한 경우, ture -> false 으로 바꾸거나, false -> true 로 바꾸어서 사진이 저장되는 시간을 다른 곳에 저장한다.'
+            // 라고 저장한 함수가 실행 되면 다음 사진이 저장될 때 저장하는 시간을 다른 곳에 넣는다.
+            // (current_date -> past_date) or (past_date -> current_date)
+            if (intervalTime != 0) {
+                if (next) {
+                    //현재시간을 구하는 함수, 정확히는 핸드폰이 켜지고 난 이후 부터의 절대적인 시간, 시간 비교를 할 떄 주로 사용된다.
+                    date1 = SystemClock.elapsedRealtime();
                 } else {
-                    jsonObject.put("CameraId", Integer.parseInt(RoomDB.getInstance(context).userDAO().getAll().get(0).getCameraId()));
-                    jsonObject.put("Thumbnail", "data:image/jpeg;base64," + dataProcess.bitmapToString(image));
+                    date2 = SystemClock.elapsedRealtime();
                 }
 
-                return Observable.just(jsonObject);
+                //시간을 비교하여 특정 초 이상이 되면 not Ok 상태로 변한다.
+                boolean ok = dataProcess.diffTime(date1, date2, intervalTime);
+                if (!ok) {
+                    //특정 초 이하라면 빈 json 객체를 전송한다.
+                    return Observable.just(jsonObject);
+                }
             }
+            //특정 초를 넘겼다면 각종 정보들을 json 에 담는다.
+
+            //객체 검출 전송
+            if (rectJson != null) {
+
+                ID id = RoomDB.getInstance(context).userDAO().getAll().get(0);
+                //UserId
+                jsonObject.put("UserId", id.getUserId());
+                //CameraId
+                jsonObject.put("CameraId", Integer.parseInt(id.getCameraId()));
+                //Created
+                jsonObject.put("Created", dataProcess.saveTime());
+                //Image
+                jsonObject.put("Image", "data:image/jpeg;base64," + dataProcess.bitmapToString(image));
+
+                //Info
+                //키 값을 반복자로 받아온다.
+                Iterator<String> iterator = rectJson.keys();
+                while (iterator.hasNext()) {
+                    //키 값과 밸류값을 기존의 json 객체에 추가한다.
+                    String name = iterator.next();
+                    jsonObject.put(name, rectJson.get(name));
+                }
+                // 썸네일 전송
+            } else {
+                jsonObject.put("CameraId", Integer.parseInt(RoomDB.getInstance(context).userDAO().getAll().get(0).getCameraId()));
+                jsonObject.put("Thumbnail", "data:image/jpeg;base64," + dataProcess.bitmapToString(image));
+            }
+
+            return Observable.just(jsonObject);
         });
     }
 

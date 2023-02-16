@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
             //페어링된 기기 알람 띄우기
             bluetoothConnect.listPairedDevices();
         });
-
     }
 
     @Override

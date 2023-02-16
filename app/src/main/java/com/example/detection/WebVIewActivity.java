@@ -6,11 +6,15 @@ import android.content.Intent;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+import android.webkit.ConsoleMessage;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -65,7 +69,6 @@ public class WebVIewActivity extends AppCompatActivity {
         });
 
         webView.loadUrl(url);
-        new Handler().postDelayed(() -> webView.reload(),3000);
     }
 
     // 안드로이드 내에서 특정 키를 누를 때 동작하는 메소드
@@ -88,7 +91,12 @@ public class WebVIewActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         //웹뷰가 가진 리소스를 모두 해제
+        webView.stopLoading();
+        webView.loadUrl("about:blank");
+        webView.setWebViewClient(null);
+        webView.setWebChromeClient(null);
         webView.destroy();
+        webView = null;
         super.onDestroy();
     }
 }

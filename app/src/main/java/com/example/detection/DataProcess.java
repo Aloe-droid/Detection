@@ -2,6 +2,10 @@ package com.example.detection;
 
 import android.graphics.Bitmap;
 import android.util.Base64;
+import android.util.Log;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
@@ -43,6 +47,15 @@ public class DataProcess {
         byte[] image = byteArrayOutputStream.toByteArray();
         //String 으로 반환
         return Base64.encodeToString(image, Base64.NO_WRAP);
+    }
+
+    //매트릭스 객체 -> 비트맵 변환
+    public Bitmap matToBitmap(Mat mat) {
+        // 480 : 216
+        Bitmap bitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mat, bitmap);
+        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 5, bitmap.getHeight() / 5, true);
+        return bitmap;
     }
 
 
