@@ -35,12 +35,12 @@ public class MqttClass implements MqttCallback {
     private final Context context;
     private MqttClient mqttClient;
     static public String TOPIC_PREVIEW = "camera/update/thumbnail";
-    static public String TOPIC_DETECT = "event/create";
     static public String TOPIC_CONTROL = "aicms/toCam";
     static public String TOPIC_MOTOR = "camera/update/degree/syn";
     static public String TOPIC_MOTOR_ACK = "camera/update/degree/ack";
     static public String TOPIC_WEBRTC = "call/start";
     static public String TOPIC_WEBRTC_FIN = "call/stop";
+    static public String TOPIC_MAKE_VIDEO = "video/create";
 
     public MqttClass(Activity activity, Context context) {
         this.context = context;

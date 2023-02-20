@@ -4,15 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.SystemClock;
-import android.util.Log;
 
 import com.example.detection.Bluetooth.BluetoothConnect;
-import com.example.detection.DB.ID;
 import com.example.detection.DB.RoomDB;
 
 import org.json.JSONObject;
-
-import java.util.Iterator;
 
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.annotations.Nullable;
@@ -41,7 +37,7 @@ public class Async {
         dataProcess = new DataProcess();
     }
 
-    public Observable<JSONObject> sendRxJava(Bitmap image, @Nullable JSONObject rectJson, float intervalTime) {
+    public Observable<JSONObject> sendRxJava(Bitmap image, @Nullable JSONObject sendVideoJson, float intervalTime) {
         return io.reactivex.rxjava3.core.Observable.defer((Supplier<ObservableSource<JSONObject>>) () -> {
             JSONObject jsonObject = new JSONObject();
             //시간 비교를 위해 구분 true 일때는 date1 에 저장, false 일 떄는 date2 에 저장된다.
@@ -65,27 +61,9 @@ public class Async {
             }
             //특정 초를 넘겼다면 각종 정보들을 json 에 담는다.
 
-            //객체 검출 전송
-            if (rectJson != null) {
-
-                ID id = RoomDB.getInstance(context).userDAO().getAll().get(0);
-                //UserId
-                jsonObject.put("UserId", id.getUserId());
-                //CameraId
-                jsonObject.put("CameraId", Integer.parseInt(id.getCameraId()));
-                //Created
-                jsonObject.put("Created", dataProcess.saveTime());
-                //Image
-                jsonObject.put("Image", "data:image/jpeg;base64," + dataProcess.bitmapToString(image));
-
-                //Info
-                //키 값을 반복자로 받아온다.
-                Iterator<String> iterator = rectJson.keys();
-                while (iterator.hasNext()) {
-                    //키 값과 밸류값을 기존의 json 객체에 추가한다.
-                    String name = iterator.next();
-                    jsonObject.put(name, rectJson.get(name));
-                }
+            //검출 종료 시 mqtt 전송
+            if (sendVideoJson != null) {
+                jsonObject = sendVideoJson;
                 // 썸네일 전송
             } else {
                 jsonObject.put("CameraId", Integer.parseInt(RoomDB.getInstance(context).userDAO().getAll().get(0).getCameraId()));
@@ -97,8 +75,8 @@ public class Async {
     }
 
     //MQTT 로 전송
-    public void sendMqtt(String topic, Bitmap image, @Nullable JSONObject rectJson, float intervalTime) {
-        disposable.add(sendRxJava(image, rectJson, intervalTime)
+    public void sendMqtt(String topic, Bitmap image, @Nullable JSONObject sendVideoJson, float intervalTime) {
+        disposable.add(sendRxJava(image, sendVideoJson, intervalTime)
                 .subscribeOn(Schedulers.single())
                 .observeOn(Schedulers.single())
                 .subscribeWith(new DisposableObserver<JSONObject>() {
@@ -110,7 +88,6 @@ public class Async {
                             //false -> true 로 바꾸어서 사진이 저장되는 시간을 다른 곳에 저장한다.
                             next = !next;
                         }
-                        Log.d("send", "success");
                     }
 
                     @Override

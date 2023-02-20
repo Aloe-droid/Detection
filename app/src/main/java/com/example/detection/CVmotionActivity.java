@@ -1,15 +1,20 @@
 package com.example.detection;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.detection.Bluetooth.BluetoothConnect;
 import com.example.detection.DB.ID;
 import com.example.detection.DB.RoomDB;
+import com.example.detection.Retrofit.Event;
+import com.example.detection.Retrofit.EventService;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
@@ -27,13 +32,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class CVmotionActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     private CameraBridgeViewBase mOpenCvCameraView;
     private Mat img_A;
     private Mat img_B;
     private Mat output;
     private boolean isFirst = true;
-    private ArrayList<Integer> checkObjectIds = new ArrayList<>();
+
     //시간 측정 및 토글링 용도
     private DataProcess dataProcess;
     private long timeCount_1 = 0L;
@@ -44,6 +55,9 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
     private BluetoothConnect bluetoothConnect;
     private Async async;
     private ID id;
+    private EventService service;
+    private final ArrayList<Integer> sendToVideo = new ArrayList<>();
+    private boolean isBooleanMotion = true;
 
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -72,6 +86,8 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
 
         checkCvPermissionCheck();
 
+        setRetrofit();
+
         async = new Async(this, this);
 
         startBluetooth();
@@ -94,7 +110,7 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
         output = inputFrame.rgba();
 
         //썸넬 전송
-        async.sendMqtt(MqttClass.TOPIC_PREVIEW, dataProcess.matToBitmap(output), null, 0.5f);
+        async.sendMqtt(MqttClass.TOPIC_PREVIEW, dataProcess.matToBitmap(output, 5), null, 0.5f);
 
         Core.flip(output, output, 1);
 
@@ -128,9 +144,9 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
 
             //시간 측정 및 갯수 세기
             if (booleanMotion) {
-                timeCount_1 = System.currentTimeMillis();
+                timeCount_1 = SystemClock.elapsedRealtime();
             } else {
-                timeCount_2 = System.currentTimeMillis();
+                timeCount_2 = SystemClock.elapsedRealtime();
             }
             motionCount++;
 
@@ -148,9 +164,12 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
         }
 
         //기존의 측정된 시간에 만약 10초 이상 더 이상 새로 생성되지 않는다면, 서버에게 상황 종료를 알림.
-        long timeCount_3 = System.currentTimeMillis();
-        if(dataProcess.diffTime(timeCount_1, timeCount_3, 10)){
-            //
+        long timeCount_3 = SystemClock.elapsedRealtime();
+        if (dataProcess.diffTime(timeCount_1, timeCount_3, 10) && isBooleanMotion) {
+            sendMotionStop();
+            isBooleanMotion = false;
+        } else if (!dataProcess.diffTime(timeCount_1, timeCount_3, 10) && !isBooleanMotion) {
+            isBooleanMotion = true;
         }
 
         img_A.release();
@@ -166,17 +185,57 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
         return output;
     }
 
+    public void setRetrofit() {
+        Retrofit retrofit = new Retrofit.Builder().baseUrl("https://" + MqttClass.SERVER_ADDRESS + ":8097/")
+                .addConverterFactory(GsonConverterFactory.create()).build();
+
+        service = retrofit.create(EventService.class);
+    }
+
     //http 전송
     public void sendMotion() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("UserId", id.getUserId());
-            jsonObject.put("CameraId", id.getCameraId());
-            jsonObject.put("Created", dataProcess.saveTime());
-            jsonObject.put("Path", "data:image/jpeg;base64," + dataProcess.bitmapToString(dataProcess.matToBitmap(output)));
-            jsonObject.put("IsRequiredObjectDetection", true);
+        if (id != null) {
+            Event event = new Event();
+            Event.EventHeader header = new Event.EventHeader();
+            header.setUserId(id.getUserId());
+            header.setCameraId(Integer.parseInt(id.getCameraId()));
+            header.setCreated(dataProcess.saveTime());
+            header.setPath(dataProcess.bitmapToString(dataProcess.matToBitmap(output, 4)));
+            header.setIsRequiredObjectDetection(false);
 
-            //retrofit 전송
+            event.setEventHeader(header);
+
+            //post
+            Call<String> call = service.sendEvent(event);
+            call.enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    //db 에 저장된 사진 id 값들을 저장한다. 이후 영상으로 변환할때 id값 들을 전달하여 서버에서 사진을 영상으로 변환하게 한다.
+                    if (response.body() != null) {
+                        sendToVideo.add(Integer.parseInt(response.body()));
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                }
+            });
+        }
+    }
+
+    // 모션감지가 끝났다고 인지하고, 서버에서 사진들을 모아 영상으로 변환하라 요청한다.
+    public void sendMotionStop() {
+        JSONObject jsonObject = new JSONObject();
+        JSONArray eventIds = new JSONArray();
+
+        for (int i : sendToVideo) {
+            eventIds.put(i);
+        }
+        sendToVideo.clear();
+        try {
+            jsonObject.put("EventHeaderIds", eventIds);
+            async.sendMqtt(MqttClass.TOPIC_MAKE_VIDEO, null, jsonObject, 0);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

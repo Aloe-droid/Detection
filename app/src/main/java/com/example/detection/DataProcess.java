@@ -2,7 +2,6 @@ package com.example.detection;
 
 import android.graphics.Bitmap;
 import android.util.Base64;
-import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -50,11 +49,11 @@ public class DataProcess {
     }
 
     //매트릭스 객체 -> 비트맵 변환
-    public Bitmap matToBitmap(Mat mat) {
-        // 480 : 216
+    public Bitmap matToBitmap(Mat mat, int size) {
+        // 480 : 216 (SIZE == 5)
         Bitmap bitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(mat, bitmap);
-        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 5, bitmap.getHeight() / 5, true);
+        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / size, bitmap.getHeight() / size, true);
         return bitmap;
     }
 
