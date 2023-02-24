@@ -6,15 +6,11 @@ import android.content.Intent;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.webkit.ConsoleMessage;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -39,36 +35,44 @@ public class WebVIewActivity extends AppCompatActivity {
         //자동꺼짐 해제
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        Intent intent = getIntent();
-        String url = intent.getStringExtra("url");
+        new Handler().post(() -> {
+            webView.setWebViewClient(new WebViewClient() {
+                @SuppressLint("WebViewClientOnReceivedSslError")
+                @Override
+                public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                    // 인증서 오류를 해결하지 않고 웹뷰로 접속을 진행
+                    handler.proceed();
+                }
+            });
 
-        WebSettings webSettings = webView.getSettings();
-        //웹뷰에서 재생가능한 콘텐츠를 자동으로 재생할 수 있도록 설정
-        webSettings.setMediaPlaybackRequiresUserGesture(false);
-        //자바 스크립트를 쓸수 있게
-        webSettings.setJavaScriptEnabled(true);
-        // HTML 5 사양의 일부
-        webSettings.setDomStorageEnabled(true);
+            //웹뷰로 띄운 웹 페이지를 컨트롤하는 함수, 크롬에 맞춰  쾌적한 환경조성을 위한 세팅으로 보면 된다.
+            webView.setWebChromeClient(new WebChromeClient() {
+                @Override
+                public void onPermissionRequest(PermissionRequest request) {
+                    // 권한 요청 승인 처리 코드
+                    request.grant(request.getResources());
+                }
+            });
 
-        webView.setWebViewClient(new WebViewClient(){
-            @SuppressLint("WebViewClientOnReceivedSslError")
-            @Override
-            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                // 인증서 오류를 해결하지 않고 웹뷰로 접속을 진행
-                handler.proceed();
-            }
+            WebSettings webSettings = webView.getSettings();
+            //웹뷰에서 재생가능한 콘텐츠를 자동으로 재생할 수 있도록 설정
+            webSettings.setMediaPlaybackRequiresUserGesture(false);
+            //자바 스크립트를 쓸수 있게
+            webSettings.setJavaScriptEnabled(true);
+            // HTML 5 사양의 일부
+            webSettings.setDomStorageEnabled(true);
+            // 웹뷰 내부 DB 사용 가능
+            webSettings.setDatabaseEnabled(true);
+            // 캐시 사용 안함.
+            webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+            Intent intent = getIntent();
+            String url = intent.getStringExtra("url");
+
+            webView.loadUrl(url);
+
         });
 
-        //웹뷰로 띄운 웹 페이지를 컨트롤하는 함수, 크롬에 맞춰  쾌적한 환경조성을 위한 세팅으로 보면 된다.
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onPermissionRequest(PermissionRequest request) {
-                // 권한 요청 승인 처리 코드
-                request.grant(request.getResources());
-            }
-        });
-
-        webView.loadUrl(url);
     }
 
     // 안드로이드 내에서 특정 키를 누를 때 동작하는 메소드

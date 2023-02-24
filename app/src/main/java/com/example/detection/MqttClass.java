@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.detection.Bluetooth.BluetoothConnect;
@@ -30,7 +31,7 @@ public class MqttClass implements MqttCallback {
     private BluetoothConnect bluetoothConnect;
     static public String CLIENT_ID = "android";
     static public String SERVER_ADDRESS = "***************************";
-
+    
     private final Activity activity;
     private final Context context;
     private MqttClient mqttClient;
@@ -160,7 +161,7 @@ public class MqttClass implements MqttCallback {
                         //만약 카메라 ID가 동일하다면 웹사이트 접속
                         if ((cameraId + "").equals(RoomDB.getInstance(context).userDAO().getAll().get(0).getCameraId())) {
                             //해당 웹사이트 주소 이후
-                            String url = "https://" + SERVER_ADDRESS + ":8093/user/ " + userId + "/camera/" + cameraId + "/register";
+                            String url = "https://" + SERVER_ADDRESS + ":8101/user/" + userId + "/camera/" + cameraId + "/register";
                             Intent intent = new Intent(activity, WebVIewActivity.class);
                             intent.putExtra("url", url);
                             activity.startActivity(intent);

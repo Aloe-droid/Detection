@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
             }else if(motionCheck.isChecked()){
                 Intent intent = new Intent(MainActivity.this, CVmotionActivity.class);
                 startActivity(intent);
+            }else if(!objectCheck.isChecked() && !motionCheck.isChecked()){
+                return;
             }
             finish();
         });

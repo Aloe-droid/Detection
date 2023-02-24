@@ -232,7 +232,7 @@ public class ProcessOnnx {
                 }
             }
 
-            //실제 확률 값은 4번의 확률값과 해당 label 의 확률값의 곱이다.
+
             float confidenceInClass = maxClass;
             //만약 그 확률 값이 특정 확률을 넘어서면 List 형태로 저장한다.
             if (confidenceInClass > objectThresh) {
@@ -279,7 +279,8 @@ public class ProcessOnnx {
                 for (int j = 1; j < detections.length; j++) {
                     Result detection = detections[j];
                     RectF b = detection.rect;
-                    if (box_iou(max.rect, b) < objectThresh) {
+                    float iouThresh = 0.45f;
+                    if (box_iou(max.rect, b) < iouThresh) {
                         pq.add(detection);
                     }
                 }

@@ -60,6 +60,15 @@ public class RectView extends View {
             result.rect.top *= scaleY;
             result.rect.bottom *= scaleY;
         }
+
+        //전면 카메라의 경우 좌우 반전이므로 객체 좌표값도 좌우 반전을 시켜야 한다. (후면 카메라의 경우 필요없음.)
+        for(Result result : resultArrayList){
+            //좌우 반전
+            float temp = result.rect.left;
+            result.rect.left = getWidth() - result.rect.right;
+            result.rect.right = getWidth() - temp;
+        }
+
         return resultArrayList;
     }
 
