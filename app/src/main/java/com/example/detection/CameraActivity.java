@@ -61,16 +61,12 @@ public class CameraActivity extends AppCompatActivity {
     private Async async;   //비동기 처리 클래스
     private int objectCount = 0; // 객체 검출 횟수를 측정
     private DataProcess dataProcess; //서버로 전송을 위한 정보 처리 클래스
-    private boolean booleanFire = false; //불이 난 시간 차를 측정하기위해 쓰이는 불리안
     private boolean isBooleanObject = true; // 객체 검출 종료를 확인하는 불리안
     private Long timeCount_1 = 0L;  //시간 비교
-    private Long timeCount_2 = 0L;  //시간 비교
     private EventService service; // retrofit post
     private ID id;
     private final ArrayList<Integer> sendToVideo = new ArrayList<>();
-    static public float scale = 1f; //미리보기 사진의 크기를 수정할 수 있다.
-    static public float interval_time = 0.5f; //미리보기 사진의 전송 시간차를 수정할 수 있다.
-
+    private boolean isDetect = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +107,7 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         //서버로 부터 제어 정보 수신 및 모터 제어 정보 수신, WebRTC 신호 정보 수신
-        async.receiveMQTT(MqttClass.TOPIC_CONTROL, MqttClass.TOPIC_MOTOR, MqttClass.TOPIC_WEBRTC, MqttClass.TOPIC_WEBRTC_FIN);
+        async.receiveMQTT(MqttClass.TOPIC_MOTOR, MqttClass.TOPIC_WEBRTC, MqttClass.TOPIC_WEBRTC_FIN);
 
         //카메라 켜기
         startCamera();
@@ -192,10 +188,10 @@ public class CameraActivity extends AppCompatActivity {
         if (image != null) {
             //이미지를 비트맵으로 변환
             Bitmap bitmap = processOnnx.imageToBitmap(image);
-            //서버로 전송할 이미지는 크기를 줄여야한다. 클라이언트가 원한다면 scale 을 키울 수 있다.
-            Bitmap serverBitmap = Bitmap.createScaledBitmap(bitmap, Math.round(bitmap.getWidth() * scale / 3), Math.round(bitmap.getHeight() * scale / 3), true);
+            //서버로 전송할 이미지는 크기를 줄여야한다.
+            Bitmap serverBitmap = Bitmap.createScaledBitmap(bitmap, Math.round(bitmap.getWidth() / 3f), Math.round(bitmap.getHeight() / 3f), true);
             //이미지 서버로 전송 (0.5초마다) 현재 크기 너비 : 높이 = 426 : 240
-            async.sendMqtt(MqttClass.TOPIC_PREVIEW, serverBitmap, null, interval_time);
+            async.sendMqtt(MqttClass.TOPIC_PREVIEW, serverBitmap, null, 0.5f);
             //비트맵 크기를 수정한다(640x640).
             Bitmap bitmap_640 = processOnnx.rescaleBitmap(bitmap);
             //비트맵을 다시 FloatBuffer 형식으로 변환한다. (rgb 값이 나열되어있는 것)
@@ -242,32 +238,29 @@ public class CameraActivity extends AppCompatActivity {
 
                 //만약 유의미한 결과가 나왔다면시간을 측정한다. 그리고 objectCount 를 증가한다.
                 if (results.size() > 0) {
-                    if (booleanFire) {
-                        timeCount_1 = SystemClock.elapsedRealtime();
-                    } else {
-                        timeCount_2 = SystemClock.elapsedRealtime();
-                    }
+                    timeCount_1 = SystemClock.elapsedRealtime();
                     objectCount++;
-                    //만약 5분간 화재가 감지되지 않았다면 count 를 0으로 수정한다.
-                    if (dataProcess.diffTime(timeCount_1, timeCount_2, 300)) {
-                        objectCount = 0;
-                    }
-                    booleanFire = !booleanFire;
+                    isDetect = true;
                 }
 
-                //count 가 5 이상이면 전송을 해당 사진을 잘라서 전송한다.
-                if (objectCount >= 5) {
-                    sendObject(bitmap, results);
-                    //다시 count 를 0으로 바꾼다.
+                //시간 비교
+                Long timeCount_2 = SystemClock.elapsedRealtime();
+                //만약 30초간 객체가 감지되지 않았다면 count 를 0으로 수정한다.
+                if (dataProcess.diffTime(timeCount_1, timeCount_2, 30)) {
                     objectCount = 0;
                 }
 
-                //기존의 측정된 시간에 만약 5초 이상 더 이상 새로 생성되지 않는다면, 서버에게 상황 종료를 알림.
-                long timeCount_3 = SystemClock.elapsedRealtime();
-                if (dataProcess.diffTime(timeCount_1, timeCount_3, 5) && isBooleanObject) {
-                    sendObjectStop();
+                //count 가 5 이상이면 전송을 해당 사진을 전송한다.
+                if (objectCount >= 5 && isDetect) {
+                    sendObject(bitmap, results);
+                    isDetect = false;
+                }
+
+                //사진의 갯수가 10개가 넘어가면 서버에게 사진 -> 영상으로 변환하라 알림.
+                if (sendToVideo.size() >= 10 && isBooleanObject) {
+                    sendObjectMakeVideo();
                     isBooleanObject = false;
-                } else if (!dataProcess.diffTime(timeCount_1, timeCount_3, 5) && !isBooleanObject) {
+                } else if (sendToVideo.size() < 10 && !isBooleanObject) {
                     isBooleanObject = true;
                 }
             } catch (OrtException | JSONException e) {
@@ -329,7 +322,7 @@ public class CameraActivity extends AppCompatActivity {
         });
     }
 
-    public void sendObjectStop() {
+    public void sendObjectMakeVideo() {
         JSONObject jsonObject = new JSONObject();
         JSONArray eventIds = new JSONArray();
 
@@ -340,7 +333,7 @@ public class CameraActivity extends AppCompatActivity {
         try {
             jsonObject.put("EventHeaderIds", eventIds);
             async.sendMqtt(MqttClass.TOPIC_MAKE_VIDEO, null, jsonObject, 0);
-            Log.d("Stop Detect!","Stop Detect!");
+            Log.d("Make Video!", "Make Video!");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -373,6 +366,12 @@ public class CameraActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+
+        //만약 앱이 종료된다면, 현재 남아있는 사진 list 를 영상으로 만들라하고 종료한다.
+        if (sendToVideo != null && sendToVideo.size() > 0) {
+            sendObjectMakeVideo();
+        }
+
         async.close();
         try {
             session.close();

@@ -2,6 +2,7 @@ package com.example.detection;
 
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 
@@ -45,11 +46,9 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
     private Mat output;
     private boolean isFirst = true;
 
-    //시간 측정 및 토글링 용도
+    //시간 측정
     private DataProcess dataProcess;
     private long timeCount_1 = 0L;
-    private long timeCount_2 = 0L;
-    private boolean booleanMotion = false;
     private long motionCount = 0;
 
     private BluetoothConnect bluetoothConnect;
@@ -58,6 +57,7 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
     private EventService service;
     private final ArrayList<Integer> sendToVideo = new ArrayList<>();
     private boolean isBooleanMotion = true;
+    private boolean isDetect = false;
 
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -95,7 +95,7 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
         dataProcess = new DataProcess();
 
         //서버로 부터 제어 정보 수신 및 모터 제어 정보 수신, WebRTC 신호 정보 수신
-        async.receiveMQTT(MqttClass.TOPIC_CONTROL, MqttClass.TOPIC_MOTOR, MqttClass.TOPIC_WEBRTC, MqttClass.TOPIC_WEBRTC_FIN);
+        async.receiveMQTT(MqttClass.TOPIC_MOTOR, MqttClass.TOPIC_WEBRTC, MqttClass.TOPIC_WEBRTC_FIN);
     }
 
     @Override
@@ -138,37 +138,34 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
             //좌우 반전이라 좌표도 반전
             Imgproc.rectangle(output, new Point(output.cols() - rect.x, rect.y), new Point(output.cols() - rect.x - rect.width, rect.y + rect.height),
                     new Scalar(0, 255, 0), 7);
-            Imgproc.putText(output, "Motion Detected!", new Point(10, 30), Imgproc.FONT_HERSHEY_DUPLEX
-                    , 1, new Scalar(0, 0, 255));
+            Imgproc.putText(output, dataProcess.saveTime(), new Point(10, 50), Imgproc.FONT_HERSHEY_DUPLEX
+                    , 2, new Scalar(0, 0, 255));
             nonZero.release();
 
             //시간 측정 및 갯수 세기
-            if (booleanMotion) {
-                timeCount_1 = SystemClock.elapsedRealtime();
-            } else {
-                timeCount_2 = SystemClock.elapsedRealtime();
-            }
+            timeCount_1 = SystemClock.elapsedRealtime();
             motionCount++;
-
-            //5분 이상 감지 되지 않았으면 초기화
-            if (dataProcess.diffTime(timeCount_1, timeCount_2, 300)) {
-                motionCount = 0;
-            }
-            booleanMotion = !booleanMotion; //토글링
+            isDetect = true;
         }
 
-        //전송
-        if (motionCount >= 10) {
-            sendMotion();
+        //시간 비교
+        Long timeCount_2 = SystemClock.elapsedRealtime();
+        //만약 30초간 객체가 감지되지 않았다면 count 를 0으로 수정한다.
+        if (dataProcess.diffTime(timeCount_1, timeCount_2, 30)) {
             motionCount = 0;
         }
 
-        //기존의 측정된 시간에 만약 10초 이상 더 이상 새로 생성되지 않는다면, 서버에게 상황 종료를 알림.
-        long timeCount_3 = SystemClock.elapsedRealtime();
-        if (dataProcess.diffTime(timeCount_1, timeCount_3, 10) && isBooleanMotion) {
-            sendMotionStop();
+        //count 가 5 이상이면 전송을 해당 사진을 전송한다.
+        if (motionCount >= 5 && isDetect) {
+            sendMotion();
+            isDetect = false;
+        }
+
+        //사진의 갯수가 10개가 넘어가면 서버에게 사진 -> 영상으로 변환하라 알림.
+        if (sendToVideo.size() >= 10 && isBooleanMotion) {
+            sendMotionMakeVideo();
             isBooleanMotion = false;
-        } else if (!dataProcess.diffTime(timeCount_1, timeCount_3, 10) && !isBooleanMotion) {
+        } else if (sendToVideo.size() < 10 && !isBooleanMotion) {
             isBooleanMotion = true;
         }
 
@@ -213,6 +210,7 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
                     //db 에 저장된 사진 id 값들을 저장한다. 이후 영상으로 변환할때 id값 들을 전달하여 서버에서 사진을 영상으로 변환하게 한다.
                     if (response.body() != null) {
                         sendToVideo.add(Integer.parseInt(response.body()));
+                        Log.d("response",response.body());
                     }
                 }
 
@@ -223,8 +221,8 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
         }
     }
 
-    // 모션감지가 끝났다고 인지하고, 서버에서 사진들을 모아 영상으로 변환하라 요청한다.
-    public void sendMotionStop() {
+    //서버에서 사진들을 모아 영상으로 변환하라 요청한다.
+    public void sendMotionMakeVideo() {
         JSONObject jsonObject = new JSONObject();
         JSONArray eventIds = new JSONArray();
 
@@ -276,6 +274,12 @@ public class CVmotionActivity extends AppCompatActivity implements CameraBridgeV
 
     @Override
     protected void onDestroy() {
+
+        //만약 앱이 종료된다면, 현재 남아있는 사진 list 를 영상으로 만들라하고 종료한다.
+        if (sendToVideo != null && sendToVideo.size() > 0) {
+            sendMotionMakeVideo();
+        }
+
         super.onDestroy();
         if (mOpenCvCameraView != null) {
             mOpenCvCameraView.disableView();
